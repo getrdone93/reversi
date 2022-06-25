@@ -1,4 +1,5 @@
-(ns reversi.core)
+(ns reversi.core
+  (:require [reversi.util :as util]))
 
 (import
   '(java.awt Color Dimension)
@@ -8,6 +9,18 @@
 (def grid-dims {:dim 900 :num-sqs 8 :sq-dim 100})
 
 (def frame-title "reversi")
+
+(defn draw-circle
+  ([im-graph sq-dim thick [sq-x sq-y] color]
+   (draw-circle im-graph (+ sq-dim thick) [sq-x sq-y] color))
+  ([im-graph tot-sq-wid [sq-x sq-y] color]
+   (let [hw (util/half tot-sq-wid)
+         diam 75
+         st-pos (- (util/half diam) 5)]
+     (.setColor im-graph color)
+     (.fillOval im-graph (- (+ (* sq-x tot-sq-wid) hw) st-pos)
+                (- (+ (* sq-y tot-sq-wid) hw) st-pos)
+                diam diam))))
 
 (defn draw-grid
   "Draws a grid with setColor and fillRect calls."
@@ -20,6 +33,12 @@
     (when (< (+ draw-y border-thick) bd)
       (draw-grid im-graph bd border-thick (+ draw-y sq-dim border-thick) border-thick sq-dim))))
 
+(defn draw-all-circles
+  [im-graph sq-dim thick nsqs]
+  (doall
+    (for [x (range nsqs)
+          y (range nsqs)]
+      (draw-circle im-graph sq-dim thick [x y]))))
 
 (defn color-frame
   "Invokes sub functions and draws the entire frame."
@@ -32,6 +51,10 @@
     (.setColor im-graph (. Color black))
     (.fillRect im-graph 0 0 id id)
     (draw-grid im-graph bd thick thick thick sq-dim)
+    (draw-circle im-graph sq-dim thick [3 3] (. Color blue))
+    (draw-circle im-graph sq-dim thick [3 4] (. Color orange))
+    (draw-circle im-graph sq-dim thick [4 3] (. Color orange))
+    (draw-circle im-graph sq-dim thick [4 4] (. Color blue))
     (. g (drawImage img 0 0 nil))
     (. im-graph (dispose))))
 
