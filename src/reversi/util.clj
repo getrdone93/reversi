@@ -7,11 +7,11 @@
   [num]
   (float (/ num 2)))
 
-(defn cartesian-product
-  [m n]
-  (vec (apply concat (map (fn [mi]
-                            (mapv (fn [ni]
-                                    [mi ni]) n)) m))))
+(defn grid-value
+  ([]
+   (grid-value (. Color blue)))
+  ([color]
+   {:color color}))
 
 (defn gen-grid
   [m n def-val]
@@ -24,3 +24,20 @@
 (defn lookup
   [grid r c]
   ((grid r) c))
+
+(defn index-value
+  [grid]
+  (let [nums (range (count grid))]
+    (for [x nums
+          y nums]
+      [[x y] (lookup grid x y)])))
+
+(defn locations
+  [grid predicate]
+    (filter (fn [[loc v]]
+              (predicate loc v)) (index-value grid)))
+
+(defn color-locations
+  [grid color]
+  (locations grid (fn [_ v]
+                    (= v (grid-value color)))))
