@@ -57,13 +57,20 @@
 (defn reverse-pieces
   ([grid start-pos oppo-col mov-func]
    (reverse-pieces grid (mov-func start-pos) oppo-col mov-func []))
-  ([grid [sr sc :as pos] oppo-col mov-func res]
+  ([grid pos oppo-col mov-func res]
    (let [{piece-col :color :as piece} (lookup grid pos)]
      (cond
        (nil? piece) res
        (or (empty? piece)
            (not= piece-col oppo-col)) (conj res piece)
        :else (recur grid (mov-func pos) oppo-col mov-func (conj res piece))))))
+
+(defn reversi?
+  ([oppo-col pieces]
+   (reversi? oppo-col pieces {} :color))
+  ([oppo-col pieces empty col-key]
+   (and (= empty (last pieces))
+        (= (set (drop-last pieces)) #{{col-key oppo-col}}))))
 
 (defn start-grid
   ([]
