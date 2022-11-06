@@ -8,8 +8,8 @@
   (float (/ num 2)))
 
 (defn grid-value
-  ([]
-   (grid-value (. Color blue)))
+  ;([]
+  ; (grid-value (. Color blue)))
   ([color]
    {:color color}))
 
@@ -17,10 +17,19 @@
   [m n def-val]
   (vec (repeat m (vec (repeat n def-val)))))
 
+(defn gen-grid-pos
+  [m n]
+  (mapv vec (partition n (for [r (range m)
+                               c (range n)]
+                           {:pos [r c]}))))
+
+;(defn change-square
+;  [grid [r c] val]
+;  (assoc grid r (assoc (grid r) c val)))
+
 (defn change-square
   [grid [r c] val]
-  (assoc grid r (assoc (grid r) c val)))
-
+  (assoc grid r (assoc (grid r) c (merge ((grid r) c) val))))
 
 (defn dim-check
   [dim [sr sc :as rc]]
@@ -86,7 +95,7 @@
   ([]
    (test-grid-oppo 8))
   ([dim]
-   (-> (gen-grid dim dim {}) (change-square [3 3] (grid-value (. Color blue)))
+   (-> (gen-grid-pos dim dim) (change-square [3 3] (grid-value (. Color blue)))
        (change-square [3 4] (grid-value (. Color orange)))
        (change-square [3 5] (grid-value (. Color orange)))
        (change-square [3 6] (grid-value (. Color blue)))
