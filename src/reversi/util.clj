@@ -63,29 +63,80 @@
   [[sr sc]]
   [sr (inc sc)])
 
-(defn reverse-pieces
+(defn move-down
+  [[sr sc]]
+  [(inc sr) sc])
+
+(defn move-up
+  [[sr sc]]
+  [(dec sr) sc])
+
+(defn move-left
+  [[sr sc]]
+  [sr (dec sc)])
+
+(defn move-down-right
+  [start-pos]
+  (-> start-pos move-down move-right))
+
+(defn move-down-left
+  [start-pos]
+  (-> start-pos move-down move-left))
+
+(defn move-up-left
+  [start-pos]
+  (-> start-pos move-up move-left))
+
+(defn move-up-right
+  [start-pos]
+  (-> start-pos move-up move-right))
+
+(defn empty-tile?
+  [tile]
+  (= #{:pos} (set (keys tile))))
+
+(defn remove-key
+  ([tiles]
+   (remove-key tiles :pos))
+  ([tiles key]
+  (mapv (fn [m]
+          (dissoc m key)) tiles)))
+
+(defn reverse-tiles
   ([grid start-pos oppo-col mov-func]
-   (reverse-pieces grid (mov-func start-pos) oppo-col mov-func []))
+   (reverse-tiles grid (mov-func start-pos) oppo-col mov-func []))
   ([grid pos oppo-col mov-func res]
-   (let [{piece-col :color :as piece} (lookup grid pos)]
+   (let [{piece-col :color :as tile} (lookup grid pos)]
      (cond
-       (nil? piece) res
-       (or (empty? piece)
-           (not= piece-col oppo-col)) (conj res piece)
-       :else (recur grid (mov-func pos) oppo-col mov-func (conj res piece))))))
+       (nil? tile) res
+       (or (empty-tile? tile)
+           (not= piece-col oppo-col)) (conj res tile)
+       :else (recur grid (mov-func pos) oppo-col mov-func (conj res tile))))))
 
 (defn reversi?
   ([oppo-col pieces]
-   (reversi? oppo-col pieces {} :color))
-  ([oppo-col pieces empty col-key]
-   (and (= empty (last pieces))
-        (= (set (drop-last pieces)) #{{col-key oppo-col}}))))
+   (reversi? oppo-col pieces :color))
+  ([oppo-col tiles col-key]
+   (and (empty-tile? (last tiles))
+        (= (set (remove-key (drop-last tiles)))
+           #{{col-key oppo-col}}))))
+
+(defn moves
+  [grid start-pos oppo-col]
+  (filter some? (map (fn [[k f]]
+            (let [pieces (reverse-tiles grid start-pos oppo-col f)]
+              (if (reversi? oppo-col pieces)
+                [k pieces])))
+          {:right move-right :down-right move-down-right
+           :down move-down :down-left move-down-left
+           :left move-left :up-left move-up-left
+           :up move-up :up-right move-up-right})))
 
 (defn start-grid
   ([]
    (start-grid 8))
   ([dim]
-  (-> (gen-grid dim dim {}) (change-square [3 3] (grid-value (. Color blue)))
+  (-> (gen-grid-pos dim dim) (change-square [3 3] (grid-value (. Color blue)))
       (change-square [3 4] (grid-value (. Color orange)))
       (change-square [4 3] (grid-value (. Color orange)))
       (change-square [4 4] (grid-value (. Color blue))))))
@@ -107,7 +158,7 @@
   ([]
    (test-grid-empty 8))
   ([dim]
-   (-> (gen-grid dim dim {}) (change-square [3 3] (grid-value (. Color blue)))
+   (-> (gen-grid-pos dim dim) (change-square [3 3] (grid-value (. Color blue)))
        (change-square [3 4] (grid-value (. Color orange)))
        (change-square [3 5] (grid-value (. Color orange)))
 
@@ -119,7 +170,7 @@
   ([]
    (test-grid-no-move 8))
   ([dim]
-   (-> (gen-grid dim dim {}) (change-square [3 3] (grid-value (. Color blue)))
+   (-> (gen-grid-pos dim dim) (change-square [3 3] (grid-value (. Color blue)))
        (change-square [3 4] (grid-value (. Color blue)))
 
        (change-square [4 3] (grid-value (. Color orange)))
