@@ -123,14 +123,14 @@
 
 (defn moves
   [grid start-pos oppo-col]
-  (filter some? (map (fn [[k f]]
+  (into {} (filterv some? (map (fn [[k f]]
             (let [pieces (reverse-tiles grid start-pos oppo-col f)]
               (if (reversi? oppo-col pieces)
                 [k pieces])))
           {:right move-right :down-right move-down-right
            :down move-down :down-left move-down-left
            :left move-left :up-left move-up-left
-           :up move-up :up-right move-up-right})))
+           :up move-up :up-right move-up-right}))))
 
 (defn start-grid
   ([]
