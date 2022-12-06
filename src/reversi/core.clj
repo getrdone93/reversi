@@ -40,9 +40,11 @@
           y (range nsqs)]
       (draw-circle im-graph sq-dim thick [x y]))))
 
+(def board-atom (atom (util/start-grid)))
+
 (defn color-frame
   "Invokes sub functions and draws the entire frame."
-  [g {d :dim nsqs :num-sqs sq-dim :sq-dim}]
+  [g {d :dim nsqs :num-sqs sq-dim :sq-dim} brd-atm]
   (let [img (new BufferedImage d d (. BufferedImage TYPE_INT_ARGB))
         id (. img (getWidth))
         im-graph (. img (getGraphics))
@@ -51,10 +53,10 @@
     (.setColor im-graph (. Color black))
     (.fillRect im-graph 0 0 id id)
     (draw-grid im-graph bd thick thick thick sq-dim)
-    (draw-circle im-graph sq-dim thick [3 3] (. Color blue))
-    (draw-circle im-graph sq-dim thick [3 4] (. Color orange))
-    (draw-circle im-graph sq-dim thick [4 3] (. Color orange))
-    (draw-circle im-graph sq-dim thick [4 4] (. Color blue))
+    (doall
+      (map (fn [{p :pos c :color}]
+             (when (some? c)
+               (draw-circle im-graph sq-dim thick p c))) (flatten @brd-atm)))
     (. g (drawImage img 0 0 nil))
     (. im-graph (dispose))))
 
@@ -64,7 +66,7 @@
   []
   (let [dim (grid-dims :dim)]
     (doto (proxy [JPanel] []
-            (paint [g] (color-frame g grid-dims)))
+            (paint [g] (color-frame g grid-dims board-atom)))
       (.setPreferredSize (new Dimension dim dim)))))
 
 (defn frame
