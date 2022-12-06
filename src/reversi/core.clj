@@ -40,6 +40,13 @@
           y (range nsqs)]
       (draw-circle im-graph sq-dim thick [x y]))))
 
+(defn draw-circles
+  [board im-graph sq-dim thick]
+  (doall
+    (map (fn [{p :pos c :color}]
+           (when (some? c)
+             (draw-circle im-graph sq-dim thick p c))) (flatten board))))
+
 (def board-atom (atom (util/start-grid)))
 
 (defn color-frame
@@ -53,10 +60,7 @@
     (.setColor im-graph (. Color black))
     (.fillRect im-graph 0 0 id id)
     (draw-grid im-graph bd thick thick thick sq-dim)
-    (doall
-      (map (fn [{p :pos c :color}]
-             (when (some? c)
-               (draw-circle im-graph sq-dim thick p c))) (flatten @brd-atm)))
+    (draw-circles @brd-atm im-graph sq-dim thick)
     (. g (drawImage img 0 0 nil))
     (. im-graph (dispose))))
 
