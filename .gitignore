@@ -1,4 +1,4 @@
-/target
+dsfasdf/target
 /classes
 /checkouts
 profiles.clj
@@ -10,3 +10,5 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+*.py
+budget_calc
