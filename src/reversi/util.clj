@@ -4,8 +4,9 @@
   '(java.awt Color))
 
 (defn half
+  "Divides a number in half and returns it as a float."
   [num]
-  (float (/ num 2)))
+  (/ num 2.0))
 
 (defn grid-value
   ;([]

@@ -9,13 +9,14 @@
 (def grid-dims {:dim 900 :num-sqs 8 :sq-dim 100})
 
 (def frame-title "reversi")
+(def default-diameter 75)
 
 (defn draw-circle
-  ([im-graph sq-dim thick [sq-x sq-y] color]
-   (draw-circle im-graph (+ sq-dim thick) [sq-x sq-y] color))
-  ([im-graph tot-sq-wid [sq-x sq-y] color]
+  ([im-graph sq-dim thick [sq-x sq-y] color diameter]
+   (draw-circle im-graph (+ sq-dim thick) [sq-x sq-y] color diameter))
+  ([im-graph tot-sq-wid [sq-x sq-y] color diameter]
    (let [hw (util/half tot-sq-wid)
-         diam 75
+         diam diameter
          st-pos (- (util/half diam) 5)]
      (.setColor im-graph color)
      (.fillOval im-graph (- (+ (* sq-x tot-sq-wid) hw) st-pos)
@@ -38,14 +39,14 @@
   (doall
     (for [x (range nsqs)
           y (range nsqs)]
-      (draw-circle im-graph sq-dim thick [x y]))))
+      (draw-circle im-graph sq-dim thick [x y] default-diameter))))
 
 (defn draw-pieces
   [board im-graph sq-dim thick]
   (doall
     (map (fn [{p :pos c :color}]
            (when (some? c)
-             (draw-circle im-graph sq-dim thick p c))) (flatten board))))
+             (draw-circle im-graph sq-dim thick p c default-diameter))) (flatten board))))
 
 (defn draw-moves
   [board im-graph sq-dim thick]
@@ -53,7 +54,8 @@
                      (last v)) (util/moves board [3 3] (. Color orange)))]
     (doall
       (map (fn [{p :pos}]
-             (draw-circle im-graph sq-dim thick p (. Color green))) moves))))
+             (draw-circle im-graph sq-dim thick p (. Color green) default-diameter)
+             (draw-circle im-graph sq-dim thick p (. Color gray) (- default-diameter 10))) moves))))
 
 (def board-atom (atom (util/start-grid)))
 
