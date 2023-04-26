@@ -103,9 +103,9 @@
   (mapv (fn [m]
           (dissoc m key)) tiles)))
 
-(defn reverse-tiles
+(defn lookup-reverse-tiles
   ([grid start-pos oppo-col mov-func]
-   (reverse-tiles grid (mov-func start-pos) oppo-col mov-func []))
+   (lookup-reverse-tiles grid (mov-func start-pos) oppo-col mov-func []))
   ([grid pos oppo-col mov-func res]
    (let [{piece-col :color :as tile} (lookup grid pos)]
      (cond
@@ -113,6 +113,11 @@
        (or (empty-tile? tile)
            (not= piece-col oppo-col)) (conj res tile)
        :else (recur grid (mov-func pos) oppo-col mov-func (conj res tile))))))
+
+(defn reverse-tiles
+  [move-pieces flip-color]
+  (mapv (fn [tile]
+       (merge tile {:color flip-color})) move-pieces))
 
 (defn reversi?
   ([oppo-col pieces]
@@ -125,7 +130,7 @@
 (defn moves
   [grid start-pos oppo-col]
   (into {} (filterv some? (map (fn [[k f]]
-            (let [pieces (reverse-tiles grid start-pos oppo-col f)]
+            (let [pieces (lookup-reverse-tiles grid start-pos oppo-col f)]
               (if (reversi? oppo-col pieces)
                 [k pieces])))
           {:right move-right :down-right move-down-right

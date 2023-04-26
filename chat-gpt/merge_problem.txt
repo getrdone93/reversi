@@ -1,0 +1,70 @@
+I need a function that merges two values together, namely the grid
+and a vector of values.
+Grid example : [[{:pos [0 0]} {:pos [0 1]}] [[{:pos [1 0]} {:pos [1 1] :color "some color"}]]]
+update vector: [{:pos [0 0] :color "some color"} {:pos [1 0] :color "some color"}]
+
+expected out: [[{:pos [0 0] :color "some color"} {:pos [0 1]}] [[{:pos [1 0] :color "some color"} {:pos [1 1] :color "some color"}]]]
+
+chat-gpt tried 4 times, and all these functions fail:
+
+(defn merge-values [grid values]
+  (let [row-size (count (first grid))
+        index-map (reduce (fn [acc i]
+                            (assoc acc (:pos i) i))
+                          {}
+                          (flatten grid))]
+    (reduce (fn [acc val]
+              (let [{:keys [pos color]} val]
+                (update-in acc [(:pos val) :color] #(or color %))))
+            index-map
+            values)
+    (->> (vals index-map)
+         (partition-all row-size)
+         (map (fn [row]
+                (->> row
+                     (map (fn [val]
+                            (select-keys val [:pos :color])))))
+              (partition-all row-size)))))
+
+(defn merge-values2 [grid values]
+  (let [positions (map :pos values)]
+    (reduce
+     (fn [acc val]
+       (let [pos (:pos val)
+             idx (->> pos (map +) (apply max) inc)]
+         (assoc-in acc [(first pos) idx]
+                   (conj (get-in acc [(first pos) idx]) (select-keys val [:pos :color])))))
+     grid
+     values)))
+
+
+(defn merge-values3 [grid values]
+  (let [x (count (first grid))
+        y (count grid)
+        merge-pos (set (map :pos values))]
+    (loop [result []
+           vals values
+           i 0
+           j 0]
+      (if (and (< i y) (< j x))
+        (if (contains? merge-pos [i j])
+          (recur (update-in result [i j] merge vals)
+                 (filter #(not= (:pos %) [i j]) vals)
+                 (if (< j (dec x)) i (inc i)) (mod (inc j) x))
+          (recur result vals
+                 (if (< j (dec x)) i (inc i)) (mod (inc j) x)))
+        result))))
+
+(defn merge-values4 [grid values]
+  (let [size (count grid)
+        values (into [] values)]
+    (reduce (fn [grid [pos & more]]
+              (let [[row col] pos]
+                (if (and (>= row 0) (< row size) (>= col 0) (< col size))
+                  (update-in grid [row col] conj (first values))
+                  grid)))
+            grid (partition 2 1 (concat [nil] values)))))
+
+
+It looks like chat-gpt understands the problem, but it cannot
+solve it. Perhaps it isn't that good at clojure.
