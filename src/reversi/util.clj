@@ -119,6 +119,14 @@
   (mapv (fn [tile]
        (merge tile {:color flip-color})) move-pieces))
 
+(defn update-grid
+  [grid updates]
+  (reduce (fn [agg {[r c] :pos :as upd-tile}]
+       (let [row (grid r)
+             grid-tile (row c)]
+         (assoc agg r (assoc row c (merge grid-tile upd-tile)))))
+        grid updates))
+
 (defn reversi?
   ([oppo-col pieces]
    (reversi? oppo-col pieces :color))

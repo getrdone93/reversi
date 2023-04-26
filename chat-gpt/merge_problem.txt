@@ -70,3 +70,13 @@ chat-gpt tried 4 times, and all these functions fail:
 
 It looks like chat-gpt understands the problem, but it cannot
 solve it. Perhaps it isn't that good at clojure.
+
+my solution:
+
+(defn update-grid
+  [grid updates]
+  (reduce (fn [agg {[r c] :pos :as upd-tile}]
+       (let [row (grid r)
+             grid-tile (row c)]
+         (assoc agg r (assoc row c (merge grid-tile upd-tile)))))
+        grid updates))
