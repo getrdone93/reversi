@@ -57,7 +57,13 @@
              (draw-circle im-graph sq-dim thick p (. Color green) default-diameter)
              (draw-circle im-graph sq-dim thick p (. Color gray) (- default-diameter 10))) moves))))
 
-(def board-atom (atom (util/start-grid)))
+(def main-board (atom (util/start-grid)))
+
+(defn update-board
+  ([updates]
+   (update-board main-board updates))
+  ([board-atom updates]
+   (swap! board-atom util/update-grid updates)))
 
 (defn color-frame
   "Invokes sub functions and draws the entire frame."
@@ -81,7 +87,7 @@
   []
   (let [dim (grid-dims :dim)]
     (doto (proxy [JPanel] []
-            (paint [g] (color-frame g grid-dims board-atom)))
+            (paint [g] (color-frame g grid-dims main-board)))
       (.setPreferredSize (new Dimension dim dim)))))
 
 (defn frame
