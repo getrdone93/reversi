@@ -3,6 +3,8 @@
 (import
   '(java.awt Color))
 
+(require '[clojure.set :as set])
+
 (defn half
   "Divides a number in half and returns it as a float."
   [num]
@@ -135,8 +137,26 @@
         (= (set (remove-key (drop-last tiles)))
            #{{col-key oppo-col}}))))
 
+(def piece-colors #{(. Color orange) (. Color blue)})
+
+(defn opposite-color
+  ([color]
+   (opposite-color color piece-colors))
+  ([color all-colors]
+   (first (set/difference all-colors #{color}))))
+
+(defn filter-grid
+  [grid key value]
+  (filterv (fn [tile]
+               (when (= value (tile key))
+                 tile)) (flatten grid)))
+
 (defn moves
-  [grid start-pos oppo-col]
+  ([grid curr-color]
+   (into {} (map (fn [{p :pos}]
+                   [p (moves grid p (opposite-color curr-color))])
+                 (filter-grid grid :color curr-color))))
+  ([grid start-pos oppo-col]
   (into {} (filterv some? (map (fn [[k f]]
             (let [pieces (lookup-reverse-tiles grid start-pos oppo-col f)]
               (if (reversi? oppo-col pieces)
@@ -144,7 +164,7 @@
           {:right move-right :down-right move-down-right
            :down move-down :down-left move-down-left
            :left move-left :up-left move-up-left
-           :up move-up :up-right move-up-right}))))
+           :up move-up :up-right move-up-right})))))
 
 (defn start-grid
   ([]
