@@ -48,14 +48,18 @@
            (when (some? c)
              (draw-circle im-graph sq-dim thick p c default-diameter))) (flatten board))))
 
+(defn draw-next-moves
+  [next-moves im-graph sq-dim thickness]
+  (doall
+    (map (fn [{p :pos}]
+           (draw-circle im-graph sq-dim thickness p (. Color green) default-diameter)
+           (draw-circle im-graph sq-dim thickness p (. Color gray) (- default-diameter 10))) next-moves)))
+
 (defn draw-moves
   [board im-graph sq-dim thick]
   (let [moves (map (fn [[_ v]]
                      (last v)) (util/moves board [3 3] (. Color orange)))]
-    (doall
-      (map (fn [{p :pos}]
-             (draw-circle im-graph sq-dim thick p (. Color green) default-diameter)
-             (draw-circle im-graph sq-dim thick p (. Color gray) (- default-diameter 10))) moves))))
+    (draw-next-moves moves im-graph sq-dim thick)))
 
 (def main-board (atom (util/start-grid)))
 
