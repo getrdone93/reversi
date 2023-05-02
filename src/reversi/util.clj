@@ -166,6 +166,25 @@
            :left move-left :up-left move-up-left
            :up move-up :up-right move-up-right})))))
 
+(defn random-choice
+  [moves]
+  (let [start-pos (rand-nth (keys moves))]
+    [start-pos (rand-nth (into [] (moves start-pos)))]))
+
+(defn player-move
+  [board curr-color]
+  (reverse-tiles (-> (random-choice (moves board curr-color))
+                                        second second)
+                                    curr-color))
+
+(defn player-move-board
+  [board curr-color]
+  (update-grid board (player-move board curr-color)))
+
+(defn game-loop
+  [board curr-color]
+  (recur (player-move-board board curr-color) (opposite-color curr-color)))
+
 (defn start-grid
   ([]
    (start-grid 8))

@@ -61,11 +61,11 @@
                      (last v)) (util/moves board [3 3] (. Color orange)))]
     (draw-next-moves moves im-graph sq-dim thick)))
 
-(def main-board (atom (util/start-grid)))
+(def board (atom (util/start-grid)))
 
 (defn update-board
   ([updates]
-   (update-board main-board updates))
+   (update-board board updates))
   ([board-atom updates]
    (swap! board-atom util/update-grid updates)))
 
@@ -82,6 +82,11 @@
     (draw-grid im-graph bd thick thick thick sq-dim)
     (draw-pieces @brd-atm im-graph sq-dim thick)
     (draw-moves @brd-atm im-graph sq-dim thick)
+
+    ;(Thread/sleep 10000)
+    ;
+    ;(update-board (util/player-move @board (. Color orange)))
+
     (. g (drawImage img 0 0 nil))
     (. im-graph (dispose))))
 
@@ -91,7 +96,7 @@
   []
   (let [dim (grid-dims :dim)]
     (doto (proxy [JPanel] []
-            (paint [g] (color-frame g grid-dims main-board)))
+            (paint [g] (color-frame g grid-dims board)))
       (.setPreferredSize (new Dimension dim dim)))))
 
 (defn frame
