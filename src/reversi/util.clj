@@ -171,11 +171,31 @@
   (let [start-pos (rand-nth (keys moves))]
     [start-pos (rand-nth (into [] (moves start-pos)))]))
 
+(defn random-choice-new
+  [moves]
+  #_(
+      moves:  {[3 2] {}, [3 4] {:right [{:pos [3 5], :color #object[java.awt.Color 0x14c7d29c java.awt.Color[r=0,g=0,b=255]]} {:pos [3 6]}], :down [{:pos [4 4], :color #object[java.awt.Color 0x14c7d29c java.awt.Color[r=0,g=0,b=255]]} {:pos [5 4]}]}, [4 3] {:right [{:pos [4 4], :color #object[java.awt.Color 0x14c7d29c java.awt.Color[r=0,g=0,b=255]]} {:pos [4 5]}], :up [{:pos [3 3], :color #object[java.awt.Color 0x14c7d29c java.awt.Color[r=0,g=0,b=255]]} {:pos [2 3]}]}}
+      the moves value for [3 2] should not be empty. This is a bug.
+      TODO: solve this
+      )
+  (println "moves: " moves)
+  (if (some? moves)
+    (let [start-pos (rand-nth (keys moves))]
+      [start-pos (rand-nth (into [] (moves start-pos)))])))
+
+(defn player-move-debug
+  [board curr-color]
+  (let [res (reverse-tiles (-> (random-choice-new (moves board curr-color))
+                               second second)
+                           curr-color)]
+    ;(println "player-move " res)
+    res))
+
 (defn player-move
   [board curr-color]
-  (reverse-tiles (-> (random-choice (moves board curr-color))
-                                        second second)
-                                    curr-color))
+  (reverse-tiles (-> (random-choice-new (moves board curr-color))
+                               second second)
+                           curr-color))
 
 (defn player-move-board
   [board curr-color]
@@ -184,6 +204,15 @@
 (defn game-loop
   [board curr-color]
   (recur (player-move-board board curr-color) (opposite-color curr-color)))
+
+(defn game-loop-new
+  ([board curr-color]
+   (game-loop-new board (player-move-board board curr-color) (opposite-color curr-color)))
+  ([prev-board curr-board curr-color]
+  (if (= prev-board curr-board)
+    curr-board
+    (recur curr-board (player-move-board curr-board curr-color)
+           (opposite-color curr-color)))))
 
 (defn start-grid
   ([]
